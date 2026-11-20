@@ -1,9 +1,11 @@
 package ruta_express.ms_kafka_admin.controller;
 
 import org.springframework.web.bind.annotation.*;
+import ruta_express.ms_kafka_admin.dto.TopicConfigUpdateDTO;
 import ruta_express.ms_kafka_admin.dto.TopicRequestDTO;
 import ruta_express.ms_kafka_admin.service.KafkaAdminService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -38,5 +40,18 @@ public class KafkaAdminController {
     public String deleteTopic(@PathVariable String name) throws ExecutionException, InterruptedException {
         kafkaAdminService.deleteTopic(name);
         return "Tópico eliminado exitosamente";
+    }
+
+    // NUEVO ENDPOINT: Modificar configuración
+    @PutMapping("/topics/{name}/config")
+    public String updateTopicConfig(@PathVariable String name, @RequestBody TopicConfigUpdateDTO request) throws ExecutionException, InterruptedException {
+        kafkaAdminService.updateTopicConfig(name, request);
+        return "Configuración del tópico actualizada";
+    }
+
+    // NUEVO ENDPOINT: Consumer Groups y Lag
+    @GetMapping("/consumer-groups")
+    public List<Map<String, Object>> listConsumerGroups() throws ExecutionException, InterruptedException {
+        return kafkaAdminService.listConsumerGroupsWithLag();
     }
 }
