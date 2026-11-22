@@ -1,29 +1,35 @@
 # ms-rutaexpress-kafka-admin
 
-Microservicio encargado de administrar el clúster de Kafka (crear, listar, describir y eliminar tópicos, así como monitorear consumer groups y su lag).
+Microservicio de **administración de Kafka** del caso RutaExpress: ver y gestionar tópicos y revisar el lag de los consumer groups. Es una API de operación (sin pantalla); se usa con Postman.
 
-## 🚀 Tecnologías
-- Java 21 / Spring Boot
-- Spring for Apache Kafka (AdminClient)
-- Maven
+> Arquitectura en capas (rama `refactor/ArquitecturaCapas`).
 
-## ⚙️ Variables de Entorno
-Revisar el archivo `.env.example`.
+## Tecnologías
+Java 21 · Spring Boot 4.1.2 · Kafka AdminClient · Bean Validation · Lombok · JUnit 5 y Mockito
 
-## 🔌 Endpoints Principales
-- `POST /api/kafka/topics` (Crear tópico)
-- `GET /api/kafka/topics` (Listar tópicos)
-- `GET /api/kafka/topics/{name}` (Describir tópico)
-- `DELETE /api/kafka/topics/{name}` (Eliminar tópico)
-- `PUT /api/kafka/topics/{name}/config` (Modificar configuración, ej. retention.ms)
-- `GET /api/kafka/consumer-groups` (Listar grupos y su lag)
-- `GET /actuator/health` (Estado del microservicio para Docker)
+## Arquitectura en capas
+Una petición baja siempre en el mismo orden: **controller → service → AdminClient**.
 
-## 🏗️ Cómo ejecutar en local
-1. Asegurarse de tener el clúster de Kafka corriendo.
-2. Ejecutar `mvn spring-boot:run`.
-3. Consumir los endpoints vía `http://localhost:8088`.
+```
+src/main/java/ruta_express/ms_kafka_admin/
+├── controller/   Solo HTTP: valida la entrada y llama al service
+├── service/      Operaciones con AdminClient y cálculo del lag
+├── dto/          Records de entrada y salida, con sus validaciones
+├── exception/    Manejador global: 400, 404, 409 y 503 (Kafka no responde)
+└── config/       AdminClient con los 3 brokers
+```
 
-## 🐳 Docker
-```bash
-docker build -t ms-rutaexpress-kafka-admin .
+## Endpoints (puerto 8088)
+| Método | Ruta | Qué hace |
+|---|---|---|
+| GET | `/api/kafka/topics` | Listar tópicos |
+| GET | `/api/kafka/topics/{name}` | Particiones y réplicas de un tópico |
+| POST | `/api/kafka/topics` | Crear tópico (201; ya existe → 409) |
+| PUT | `/api/kafka/topics/{name}/config` | Cambiar configuración (por ejemplo `retention.ms`) |
+| DELETE | `/api/kafka/topics/{name}` | Eliminar tópico |
+| GET | `/api/kafka/consumer-groups` | Grupos, estado y lag total |
+
+## Tests
+```
+mvnw.cmd test
+```

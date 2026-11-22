@@ -5,4 +5,5 @@ spring:
   application:
     name: ms-rutaexpress-kafka-admin
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    # los 3 brokers de rutaexpress-infra/kafka
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
